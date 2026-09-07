@@ -36,6 +36,8 @@ Verified so far:
 bd ready          # unblocked tasks
 bd list --all     # everything
 bd dep tree <id>  # dependency tree of an epic
+bd graph <id>     # ASCII layered dependency graph (wide terminal)
+npx -y beads-ui start   # community web UI on http://127.0.0.1:3000 (Issues, Epics, Board); verified 2026-09-07
 ```
 
 Not yet verified (no code yet): `uv run pytest`, `uv run uvicorn isde_api.main:app`, `uv run python -m isde_api.ingest`.
