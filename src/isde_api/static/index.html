@@ -1,0 +1,128 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="The current RVO ISDE meldcode lists as JSON.">
+  <title>ISDE Meldcode API</title>
+  <style>
+    :root { --ink: #17211b; --muted: #66736a; --line: #d9e1db; --paper: #f7faf7; --card: #fff; --green: #176b45; --mint: #dff2e7; --red: #9f2e2e; }
+    * { box-sizing: border-box; }
+    .sr-only { position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0,0,0,0); white-space: nowrap; border: 0; }
+    body { margin: 0; color: var(--ink); background: var(--paper); font: 16px/1.55 system-ui, sans-serif; }
+    main { width: min(1100px, calc(100% - 36px)); margin: 0 auto; }
+    header { padding: 72px 0 52px; max-width: 760px; }
+    .eyebrow { color: var(--green); font-size: .8rem; font-weight: 750; letter-spacing: .12em; text-transform: uppercase; }
+    h1 { margin: 10px 0 18px; font-size: clamp(2.5rem, 7vw, 5.4rem); letter-spacing: -.07em; line-height: .98; }
+    h2 { margin: 0 0 18px; font-size: 1.45rem; letter-spacing: -.02em; }
+    header p { max-width: 620px; margin: 0; color: var(--muted); font-size: 1.15rem; }
+    section { margin: 0 0 52px; }
+    .grid { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; }
+    .card { border: 1px solid var(--line); border-radius: 14px; background: var(--card); padding: 18px; }
+    .category { min-height: 146px; }
+    .category h3 { margin: 0 0 12px; font-size: 1rem; }
+    .count { display: block; font-size: 2rem; font-weight: 750; letter-spacing: -.04em; }
+    .meta { color: var(--muted); font-size: .83rem; }
+    .examples { display: grid; grid-template-columns: 1fr; gap: 12px; }
+    .example { position: relative; padding: 0; overflow: hidden; }
+    .example pre { margin: 0; padding: 18px; padding-right: 80px; white-space: pre-wrap; overflow-wrap: anywhere; overflow-x: auto; color: #e8f4ec; background: #1d2922; font: .82rem/1.5 ui-monospace, monospace; }
+    button { border: 0; border-radius: 8px; cursor: pointer; font: inherit; }
+    .copy { position: absolute; top: 12px; right: 12px; padding: 5px 9px; color: var(--ink); background: #dff2e7; font-size: .8rem; }
+    .copy:focus-visible, input:focus-visible, .lookup button:focus-visible { outline: 3px solid #83caa2; outline-offset: 2px; }
+    .lookup { display: flex; gap: 10px; max-width: 650px; }
+    input { min-width: 0; flex: 1; border: 1px solid var(--line); border-radius: 8px; padding: 12px 14px; color: var(--ink); background: #fff; font: inherit; }
+    .lookup button { padding: 0 18px; color: #fff; background: var(--green); font-weight: 700; }
+    #lookup-output { min-height: 28px; margin-top: 16px; }
+    #lookup-output pre { max-height: 340px; margin: 0; overflow: auto; padding: 16px; border-radius: 10px; color: #e8f4ec; background: #1d2922; font: .82rem/1.5 ui-monospace, monospace; }
+    .error { color: var(--red); }
+    a { color: var(--green); font-weight: 650; }
+    footer { padding: 10px 0 60px; color: var(--muted); font-size: .9rem; }
+    footer p { max-width: 760px; }
+    @media (max-width: 780px) { header { padding-top: 46px; } .grid { grid-template-columns: repeat(2, 1fr); } .category:last-child { grid-column: span 2; } }
+    @media (max-width: 500px) { main { width: min(100% - 24px, 1100px); } .grid, .examples { grid-template-columns: 1fr; } .category:last-child { grid-column: auto; } .lookup { flex-direction: column; } .lookup button { padding: 12px; } }
+  </style>
+</head>
+<body>
+  <main>
+    <header>
+      <div class="eyebrow">Free, current data</div>
+      <h1>ISDE meldcodes,<br>ready for code.</h1>
+      <p>The current RVO product lists for heat pumps, insulation, glass, solar boilers and ventilation. Use one API request or download the complete dataset.</p>
+    </header>
+
+    <section aria-labelledby="coverage-title">
+      <h2 id="coverage-title">Current coverage</h2>
+      <div id="categories" class="grid" aria-live="polite"><div class="card category"><span class="meta">Loading current data...</span></div></div>
+    </section>
+
+    <section aria-labelledby="examples-title">
+      <h2 id="examples-title">Start with a request</h2>
+      <div class="examples">
+        <div class="card example"><button class="copy" type="button" data-path="/v1/categories">Copy</button><pre><code>curl /v1/categories</code></pre></div>
+        <div class="card example"><button class="copy" type="button" data-path="/v1/products?category=heat_pumps">Copy</button><pre><code>curl '/v1/products?category=heat_pumps'</code></pre></div>
+        <div class="card example"><button class="copy" type="button" data-path="/v1/meldcode/KA01290">Copy</button><pre><code>curl /v1/meldcode/KA01290</code></pre></div>
+      </div>
+    </section>
+
+    <section aria-labelledby="lookup-title">
+      <h2 id="lookup-title">Look up a meldcode</h2>
+      <form class="lookup" id="lookup-form">
+        <label for="meldcode" class="sr-only">Meldcode</label>
+        <input id="meldcode" name="meldcode" placeholder="For example, KA01290" pattern="[A-Za-z]{2}[0-9]{5}" required autocomplete="off">
+        <button type="submit">Search</button>
+      </form>
+      <div id="lookup-output" aria-live="polite"></div>
+    </section>
+
+    <footer>
+      <p><a href="/docs">API documentation</a> · <a href="/v1/export">Download all JSON</a> · <a href="https://www.rvo.nl/subsidies-financiering/isde/meldcodelijsten" rel="noreferrer">RVO source lists</a></p>
+      <p>Independent service using RVO data. These downloads confer no rights. Product data does not establish subsidy eligibility. Check the current RVO conditions.</p>
+    </footer>
+  </main>
+  <script>
+    const categories = document.querySelector('#categories');
+    const output = document.querySelector('#lookup-output');
+    const pretty = value => JSON.stringify(value, null, 2);
+    const showError = (node, message) => { node.innerHTML = ''; const p = document.createElement('p'); p.className = 'error'; p.textContent = message; node.append(p); };
+
+    async function loadCategories() {
+      try {
+        const response = await fetch('/v1/categories');
+        if (!response.ok) throw new Error('Current data is unavailable.');
+        const data = await response.json();
+        categories.replaceChildren();
+        data.items.forEach(item => {
+          const card = document.createElement('article'); card.className = 'card category';
+          const title = document.createElement('h3'); title.textContent = item.category.replaceAll('_', ' ');
+          const count = document.createElement('span'); count.className = 'count'; count.textContent = item.count.toLocaleString();
+          const meta = document.createElement('span'); meta.className = 'meta'; meta.textContent = `${item.source.published_month || 'Current'} · fetched ${new Date(item.source.fetched_at).toLocaleDateString()}`;
+          card.append(title, count, meta); categories.append(card);
+        });
+      } catch (error) { showError(categories, error.message); }
+    }
+
+    document.querySelectorAll('[data-path]').forEach(button => {
+      const command = `curl '${window.location.origin}${button.dataset.path}'`;
+      button.parentElement.querySelector('code').textContent = command;
+      button.addEventListener('click', async () => {
+        try {
+          await navigator.clipboard.writeText(command);
+          button.textContent = 'Copied';
+        } catch { button.textContent = 'Select text'; }
+        setTimeout(() => { button.textContent = 'Copy'; }, 1500);
+      });
+    });
+    document.querySelector('#lookup-form').addEventListener('submit', async event => {
+      event.preventDefault(); output.innerHTML = '';
+      const code = document.querySelector('#meldcode').value.trim().toUpperCase();
+      try {
+        const response = await fetch(`/v1/meldcode/${encodeURIComponent(code)}`);
+        const data = await response.json();
+        if (!response.ok) throw new Error(data.detail || 'Meldcode not found.');
+        const pre = document.createElement('pre'); pre.textContent = pretty(data); output.append(pre);
+      } catch (error) { showError(output, error.message); }
+    });
+    loadCategories();
+  </script>
+</body>
+</html>

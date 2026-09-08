@@ -1,0 +1,28 @@
+default_language_version:
+  python: python3.14
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-check
+        name: ruff check
+        entry: uv run ruff check
+        language: system
+        types: [python]
+      - id: ruff-format
+        name: ruff format check
+        entry: uv run ruff format --check
+        language: system
+        types: [python]
+      - id: ty
+        name: ty check
+        entry: uv run ty check
+        pass_filenames: false
+        language: system
+        types: [python]
+      - id: beads-export
+        name: beads export (.beads/issues.jsonl snapshot, rdeknijf/square#909)
+        entry: scripts/bd-export-hook.sh
+        language: script
+        always_run: true
+        pass_filenames: false
+        stages: [pre-commit]

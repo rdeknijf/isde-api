@@ -1,0 +1,11 @@
+services:
+  api:
+    build: .
+    container_name: isde-api
+    restart: unless-stopped
+    environment:
+      DATABASE_PATH: /data/isde.db
+    ports:
+      - "127.0.0.1:8010:8000"
+    volumes:
+      - ./data:/data

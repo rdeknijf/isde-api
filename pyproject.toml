@@ -1,0 +1,46 @@
+[build-system]
+requires = ["uv_build>=0.12.10"]
+build-backend = "uv_build"
+
+[project]
+name = "isde-api"
+version = "0.1.0"
+description = "Current RVO ISDE meldcode data as a JSON API"
+requires-python = ">=3.14"
+dependencies = [
+    "click>=8.5.0",
+    "fastapi>=0.141.1",
+    "httpx>=0.28.1",
+    "openpyxl>=3.1.5",
+    "pydantic>=2.13.5",
+    "uvicorn>=0.52.4",
+]
+
+[project.scripts]
+isde-ingest = "isde_api.ingest:main"
+
+[dependency-groups]
+dev = [
+    "playwright>=1.62.0",
+    "pre-commit>=4.6.2",
+    "pytest>=9.1.1",
+    "pytest-cov>=7.1.0",
+    "pytest-socket>=0.8.1",
+    "ruff>=0.16.6",
+    "ty>=0.0.78",
+]
+
+[tool.pytest.ini_options]
+addopts = "--disable-socket --allow-unix-socket"
+testpaths = ["tests"]
+
+[tool.coverage.run]
+source = ["src/isde_api"]
+
+[tool.ruff]
+line-length = 88
+target-version = "py314"
+src = ["src"]
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "UP"]

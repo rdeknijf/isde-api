@@ -1,0 +1,16 @@
+services:
+  api:
+    ports: !override []
+    labels:
+      traefik.enable: "true"
+      traefik.http.routers.isde-api.rule: "Host(`isde.deknijf.com`)"
+      traefik.http.routers.isde-api.entrypoints: websecure
+      traefik.http.routers.isde-api.tls.certresolver: myresolver
+      traefik.http.services.isde-api.loadbalancer.server.port: "8000"
+      traefik.docker.network: proxy
+    networks:
+      - proxy
+
+networks:
+  proxy:
+    external: true

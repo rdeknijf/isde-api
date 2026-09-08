@@ -20,3 +20,8 @@ data/
 *.db
 .beads-credential-key
 .beads/proxieddb/
+
+# beads: local interaction log, never shared (.beads/issues.jsonl is the tracked backup)
+.beads/interactions.jsonl
+.beads-credential-key
+.beads/proxieddb/
