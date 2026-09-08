@@ -1,12 +1,22 @@
 # ISDE Meldcode API
 
-REST API serving the RVO ISDE meldcodelijsten (subsidy-eligible products for heat pumps, insulation, glass, solar boilers, ventilation) as clean, versioned JSON.
+Public REST API serving the current RVO ISDE meldcodelijsten for heat pumps, insulation, glass, solar boilers, and ventilation as clean JSON.
 
 Origin: discovery run 2026-09-06, ranked first in `~/projects/idea-machine/api-opportunities.md` (Codex round, score 8.0). Sister project and pattern reference: `~/projects/grid-emissions-api` (ENTSO-E to FastAPI plus SQLite).
 
 ## Mission
 
-RVO publishes the meldcode lists only as monthly Excel files, one per product category, with no API, no history, and no change feed. Installer quotation software and renovation marketplaces need "meldcode X: product, indicative subsidy, valid on date Z" as one JSON call. This project ingests every monthly release, keeps full history, and serves lookups plus a changes feed. Free tier now; metered paid tier later.
+Provide a useful free public service and demonstrate reliable implementation. RVO provides downloadable Excel lists and an online product lookup. This API makes the current product data easy to reuse. Revenue and buyer commitments are not v1 requirements.
+
+## V1 scope (confirmed 2026-09-07)
+
+Serve current data only: meldcode lookup, product search, categories, and a complete JSON download. Include source references, retrieval dates, and explicit subsidy units. Product data does not establish subsidy eligibility.
+
+Keep source URLs, published months where available, retrieval dates, and content hashes with the current data. Retain raw source files for error investigation and possible later reprocessing. These are source records, not historical eligibility dates.
+
+Keep ingestion separate from API queries so a later change can add historical storage. V1 stores only the current normalised data. Do not implement history tables, release comparison, historical backfill, snapshot endpoints, or date query parameters. History remains a later extension, not a v1 prerequisite.
+
+No accounts, metered billing, or speculative usage counters. Use Beads for deferred work. Rutger authorised the current-data v1 build on 2026-09-07.
 
 ## Verified facts (2026-09-07)
 
@@ -16,7 +26,7 @@ RVO publishes the meldcode lists only as monthly Excel files, one per product ca
 - Column layout differs per category. Warmtepompen: `MELDCODE, Fabrikant / Merknaam, Model, Vermogen (KW), Subsidiebedrag, Subsidiebedragt 2e warmtepomp, NAAM_KOUDEMIDDEL, GWP, Categorie`. Isolatiematerialen: `MELDCODE, Fabrikant / Merknaam, Model, NAAM_MATERIAAL, MIN_WAARDE_RD, MIN_DIKTE_MM, Subsidiebedrag bij een enkele maatregel, Subsidiebedrag bij meerdere maateregelen, BioBased Bonus, Categorie, Woning Type`. Headers contain typos (`Subsidiebedragt`, `maateregelen`); map them explicitly, do not rely on exact text staying stable.
 - Amounts are formatted strings with leading spaces and Dutch separators (`'  €4.425'`, `' €20,25'`, `'  .'` for empty). Parse to integer cents.
 - Meldcodes look like `KA01290` (KA plus five digits) in both inspected lists.
-- License: RVO open-data policy <https://www.rvo.nl/onderwerpen/open-data> permits reuse including commercial use (per discovery round; re-read before launch and quote the exact text in this file).
+- Reuse checked 2026-09-07: <https://www.rvo.nl/onderwerpen/open-data> says "U mag deze hergebruiken." and "U bent niet verplicht RVO als bron te vermelden, tenzij het anders vermeld staat bij de datasets en webservices." The policy permits reuse and distribution of information, including apps. Images have separate restrictions. The meldcode download page states that the downloads confer no rights; it shows no separate reuse restriction. Include attribution and this disclaimer.
 - Older monthly releases: not verified whether RVO keeps them online. Assume no; archive every fetched file ourselves from day one.
 - Existing competitor: ISDEscan (<https://isdescan.nl/isde-meldcode-check>), consumer lookup, no API, no history.
 - Rutger's own ISDE application context lives in `~/projects/isolation-subsidies` (meldcode verification for his 2026 application). Useful as a real test case; not a dependency.
@@ -25,7 +35,7 @@ RVO publishes the meldcode lists only as monthly Excel files, one per product ca
 
 - Python, latest stable; uv, ruff, ty, pytest, pytest-cov, pytest-socket, pre-commit; src layout, no `__init__.py` in tests.
 - FastAPI plus SQLite, same shape as grid-emissions-api. openpyxl for ingestion.
-- Deploy: Docker plus Traefik on buckland, behind Cloudflare. Domain to be decided.
+- Deploy: Docker plus Traefik on buckland, behind Cloudflare. Rutger selected `isde.deknijf.com` for now on 2026-09-07.
 - Task tracking: beads (`bd`) in `.beads/`. This project is also the evaluation of beads as a task system. Run `bd ready` to find unblocked work, `bd show <id>` for detail, `bd close <id>` when verified done. Record beads friction in `STATUS.md` under "Beads evaluation".
 
 ## Commands
@@ -40,13 +50,27 @@ bd graph <id>     # ASCII layered dependency graph (wide terminal)
 npx -y beads-ui start   # community web UI on http://127.0.0.1:3000 (Issues, Epics, Board); verified 2026-09-07
 ```
 
-Not yet verified (no code yet): `uv run pytest`, `uv run uvicorn isde_api.main:app`, `uv run python -m isde_api.ingest`.
+Implementation commands verified on 2026-09-07:
+
+```sh
+uv sync
+uv run isde-ingest
+uv run pytest --cov=isde_api --cov-report=term-missing
+uv run ruff check src tests
+uv run ty check
+uv run pre-commit run --files src/isde_api/*.py tests/*.py
+sh scripts/install-hooks.sh
+docker compose up -d --build
+curl http://127.0.0.1:8010/health
+ISDE_BROWSER_URL=http://127.0.0.1:8010 uv run pytest tests/test_browser.py --allow-hosts=127.0.0.1
+```
+
+Use `README.md` for the API contract and deployment commands. The local Docker preview uses port 8010. `scripts/ingest.sh` archives raw sources in the persistent `/data/raw` volume. Beads owns the Git hook path; `scripts/install-hooks.sh` preserves its hook and chains the pre-commit checks. The current session permits no Git operations. Rutger approved public deployment on 2026-09-07. V1 is live at https://isde.deknijf.com with a verified daily import at 03:15 Europe/Amsterdam. See STATUS.md for deployment details.
 
 ## Open decisions
 
-- Domain name (`isde.deknijf.com` as working assumption).
 - Whether to include the "Aanvraag vermelding" forms (manufacturer application forms). Out of scope for v1.
-- Cross-list identifiers: whether one meldcode can appear in multiple category lists. Check during ingestion.
+- The August 2026 import contains 8,044 records and no duplicate meldcodes within or across categories. The API preserves duplicate records if future lists contain them.
 
 <!-- BEGIN BEADS INTEGRATION v:1 profile:minimal hash:6cd5cc61 -->
 ## Beads Issue Tracker

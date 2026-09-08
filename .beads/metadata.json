@@ -1,7 +1,9 @@
 {
   "database": "dolt",
   "backend": "dolt",
-  "dolt_mode": "embedded",
+  "dolt_mode": "server",
   "dolt_database": "isde",
-  "project_id": "1ab71150-5a25-413e-8600-4dc058fcbbae"
+  "project_id": "1ae32eee-d994-4066-9c54-cd38e0af9b8f",
+  "global_dolt_database": "beads_global",
+  "global_project_id": "00000000-0000-0000-0000-000000000000"
 }
