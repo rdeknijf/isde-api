@@ -1,5 +1,7 @@
 # STATUS
 
+Attention: maintain
+
 ## Last update
 
 2026-09-08: Public health confirms 8,044 records. The scheduled daily import finished successfully at 03:15:06 Europe/Amsterdam with unchanged source content. V1 remains live at <https://isde.deknijf.com>.
