@@ -3,9 +3,12 @@
 import json
 import sqlite3
 from contextlib import closing
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 from isde_api.models import Category, Product, Source
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 CATEGORIES: tuple[Category, ...] = (
     "heat_pumps",
@@ -16,7 +19,7 @@ CATEGORIES: tuple[Category, ...] = (
 )
 
 
-class DataUnavailable(Exception):
+class DataUnavailableError(Exception):
     """No complete dataset has been imported yet."""
 
 
@@ -89,7 +92,7 @@ def query(
 ) -> tuple[list[Product], int, list[Source]]:
     """Read records, counts and source metadata from the same SQLite snapshot."""
     if not path.is_file():
-        raise DataUnavailable("No current dataset. Run isde-ingest first.")
+        raise DataUnavailableError("No current dataset. Run isde-ingest first.")
     clauses: list[str] = []
     params: list[str | int] = []
     for column, value in (("meldcode", code), ("category", category)):
@@ -100,6 +103,7 @@ def query(
         if value is not None:
             clauses.append(f"instr(p.{column}, ?) > 0")
             params.append(value.casefold())
+    # Every clause holds a fixed column name; all values are bound parameters.
     where = " WHERE " + " AND ".join(clauses) if clauses else ""
     try:
         with closing(
@@ -111,12 +115,13 @@ def query(
                 for r in db.execute("SELECT payload FROM sources ORDER BY category")
             ]
             if {s.category for s in sources} != set(CATEGORIES):
-                raise DataUnavailable("No complete current dataset")
+                raise DataUnavailableError("No complete current dataset")
             total = db.execute(
-                "SELECT count(*) FROM products p" + where, params
+                "SELECT count(*) FROM products p" + where,  # noqa: S608
+                params,
             ).fetchone()[0]
             sql = (
-                "SELECT p.payload, s.payload FROM products p "
+                "SELECT p.payload, s.payload FROM products p "  # noqa: S608
                 "JOIN sources s ON s.category = p.category"
                 + where
                 + " ORDER BY p.meldcode, p.category, p.id"
@@ -130,4 +135,4 @@ def query(
             ]
             return records, total, sources
     except sqlite3.OperationalError as exc:
-        raise DataUnavailable("Current dataset is unavailable") from exc
+        raise DataUnavailableError("Current dataset is unavailable") from exc

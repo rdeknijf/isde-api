@@ -1,13 +1,16 @@
-from collections.abc import Sequence
 from datetime import UTC, datetime
 from hashlib import sha256
 from io import BytesIO
+from typing import TYPE_CHECKING
 
 import pytest
 from openpyxl import Workbook
 
 from isde_api.models import Category, Source
 from isde_api.parsers import LAYOUTS, WorkbookParseError, parse_workbook
+
+if TYPE_CHECKING:
+    from collections.abc import Sequence
 
 
 def workbook_bytes(

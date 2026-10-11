@@ -1,6 +1,6 @@
 from contextlib import closing
 from datetime import UTC, datetime
-from pathlib import Path
+from typing import TYPE_CHECKING
 
 import pytest
 from click.testing import CliRunner
@@ -9,6 +9,9 @@ from fastapi.testclient import TestClient
 from isde_api.main import DISCLAIMER, create_app
 from isde_api.models import Product, Source, Subsidy
 from isde_api.storage import CATEGORIES, publish, query
+
+if TYPE_CHECKING:
+    from pathlib import Path
 
 
 @pytest.fixture

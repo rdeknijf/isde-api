@@ -119,11 +119,13 @@ def test_download_rejects_bad_responses(mode):
             return httpx.Response(302, headers={"location": str(request.url)})
         return httpx.Response(500)
 
-    with httpx.Client(transport=httpx.MockTransport(respond)) as client:
-        with pytest.raises((ValueError, httpx.HTTPStatusError)):
-            _download(
-                client,
-                "https://www.rvo.nl/sites/default/files/test.xlsx",
-                4,
-                workbook=True,
-            )
+    with (
+        httpx.Client(transport=httpx.MockTransport(respond)) as client,
+        pytest.raises((ValueError, httpx.HTTPStatusError)),
+    ):
+        _download(
+            client,
+            "https://www.rvo.nl/sites/default/files/test.xlsx",
+            4,
+            workbook=True,
+        )
