@@ -36,3 +36,6 @@ jobs:
 
       - name: Tests
         run: uv run pytest
+
+      - name: Dependency audit
+        run: uv audit --locked
