@@ -33,7 +33,7 @@ No accounts, metered billing, or speculative usage counters. Use Beads for defer
 
 ## Stack (decided)
 
-- Python, latest stable; uv, ruff, ty, pytest, pytest-cov, pytest-socket, pre-commit; src layout, no `__init__.py` in tests.
+- Python, latest stable (3.15, pinned in `.python-version`; the Docker image installs the same version through uv); uv, ruff, ty, pytest, pytest-cov, pytest-socket, prek; src layout, no `__init__.py` in tests.
 - FastAPI plus SQLite, same shape as grid-emissions-api. openpyxl for ingestion.
 - Deploy: Docker plus Traefik on buckland, behind Cloudflare. Rutger selected `isde.deknijf.com` for now on 2026-09-07.
 - Task tracking: beads (`bd`) in `.beads/`, see *Issue tracking* below. This project was also the evaluation of beads as a task system; the findings are in `STATUS.md` under "Beads evaluation".
@@ -55,11 +55,12 @@ Implementation commands verified on 2026-09-07:
 ```sh
 uv sync
 uv run isde-ingest
-uv run pytest --cov=isde_api --cov-report=term-missing
-uv run ruff check src tests
+uv run pytest
+uv run ruff check .
 uv run ty check
-uv run pre-commit run --files src/isde_api/*.py tests/*.py
-prek install
+uv run prek run --all-files
+uv run prek install
+uv audit --locked
 docker compose up -d --build
 curl http://127.0.0.1:8010/health
 ISDE_BROWSER_URL=http://127.0.0.1:8010 uv run pytest tests/test_browser.py --allow-hosts=127.0.0.1

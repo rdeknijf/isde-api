@@ -11,7 +11,7 @@ from pydantic import BaseModel
 from starlette.exceptions import HTTPException
 
 from isde_api.models import Category, Product, Source
-from isde_api.storage import DataUnavailable, query
+from isde_api.storage import DataUnavailableError, query
 
 SOURCE_PAGE = "https://www.rvo.nl/subsidies-financiering/isde/meldcodelijsten"
 DISCLAIMER = (
@@ -50,8 +50,8 @@ def create_app(database: Path | None = None) -> FastAPI:
         else Path(os.environ.get("DATABASE_PATH", "data/isde.db"))
     )
 
-    @app.exception_handler(DataUnavailable)
-    async def unavailable(_request: Request, exc: DataUnavailable) -> JSONResponse:
+    @app.exception_handler(DataUnavailableError)
+    async def unavailable(_request: Request, exc: DataUnavailableError) -> JSONResponse:
         return JSONResponse(
             status_code=503,
             content={

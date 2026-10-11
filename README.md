@@ -49,11 +49,12 @@ Raw files persist under `data/raw/<category>/<sha256>.xlsx`, with source metadat
 ## Validation
 
 ```sh
-uv run pytest --cov=isde_api --cov-report=term-missing
-uv run ruff check src tests
-uv run ruff format --check src tests
+uv run pytest
+uv run ruff check .
+uv run ruff format --check .
 uv run ty check
-uv run pre-commit run --files src/isde_api/*.py tests/*.py
+uv run prek run --all-files
+uv audit --locked
 ```
 
 The default tests block network sockets. They permit Unix sockets for the ASGI event loop. The browser test requires a local server and runs separately:
@@ -65,7 +66,7 @@ ISDE_BROWSER_URL=http://127.0.0.1:8010 uv run pytest tests/test_browser.py --all
 
 The browser test checks category counts, lookup success and failure, clipboard content, mobile overflow, and unavailable data. It saves desktop and mobile screenshots under `data/screenshots/`. All data and screenshots stay outside version control.
 
-`prek install` wires the pre-commit checks (ruff, ty, and the beads snapshot export). Run it after `uv sync` on a fresh checkout.
+`uv run prek install` wires the git hooks: ruff, ty, and the beads snapshot export on commit, and the quick test run on push. Run it after `uv sync` on a fresh checkout. `uv run pytest` reports coverage by default.
 
 ## Container and deployment
 

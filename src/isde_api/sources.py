@@ -194,7 +194,7 @@ def fetch_sources(raw_dir: Path) -> list[tuple[Source, bytes]]:
             content = _download(client, url, _MAX_WORKBOOK_BYTES, workbook=True)
             fetched_at = datetime.now(UTC)
             source = Source(
-                category=cast(Category, category),
+                category=cast("Category", category),
                 url=url,
                 published_month=_published_month(url),
                 fetched_at=fetched_at,

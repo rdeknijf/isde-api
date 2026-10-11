@@ -1,24 +1,42 @@
-default_language_version:
-  python: python3.14
+default_install_hook_types: [pre-commit, pre-push]
+
 repos:
-  - repo: local
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: "v6.0.0"
+    hooks:
+      - id: check-added-large-files
+      - id: check-merge-conflict
+      - id: check-toml
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+      - id: mixed-line-ending
+      - id: detect-private-key
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: "v0.17.0"
     hooks:
       - id: ruff-check
-        name: ruff check
-        entry: uv run ruff check
-        language: system
-        types: [python]
+        args: [--fix]
       - id: ruff-format
-        name: ruff format check
-        entry: uv run ruff format --check
-        language: system
-        types: [python]
+
+  - repo: local
+    hooks:
       - id: ty
-        name: ty check
+        name: ty (type check)
         entry: uv run ty check
-        pass_filenames: false
         language: system
         types: [python]
+        pass_filenames: false
+
+      - id: pytest-quick
+        name: pytest (quick)
+        entry: uv run pytest -x -q --no-cov
+        language: system
+        types: [python]
+        pass_filenames: false
+        stages: [pre-push]
+
       - id: beads-export
         name: beads export (.beads/issues.jsonl snapshot, rdeknijf/square#909)
         entry: scripts/bd-export-hook.sh
