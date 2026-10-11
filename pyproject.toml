@@ -6,7 +6,7 @@ build-backend = "uv_build"
 name = "isde-api"
 version = "0.1.0"
 description = "Current RVO ISDE meldcode data as a JSON API"
-requires-python = ">=3.14"
+requires-python = ">=3.15"
 dependencies = [
     "click>=8.5.0",
     "fastapi>=0.143.0",
