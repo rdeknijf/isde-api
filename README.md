@@ -40,7 +40,7 @@ Each product includes its meldcode, category, manufacturer, model, subsidies, ca
 
 Subsidy purposes preserve source distinctions: `standard`, `second_heat_pump`, `single_measure`, `multiple_measures`, `biobased_bonus`, and `monument`. Do not add these amounts without the applicable RVO rules. Attributes retain source values; fields such as insulation thickness can contain text.
 
-Source metadata includes the official URL, the published month where available, the retrieval time, and the SHA-256 content hash. These dates describe the source. They do not establish eligibility dates. The current lists contain 8,044 records as verified on 2026-09-07. That count can change.
+Source metadata includes the official URL, the published month where available, the retrieval time, and the SHA-256 content hash. These dates describe the source. They do not establish eligibility dates. The October 2026 lists contain 6,916 records as verified on 2026-11-01. That count changes with each monthly release.
 
 The importer discovers the five product workbooks from the RVO page. It excludes application forms and rejects ambiguous links or unsupported workbook layouts. It validates all five categories before one database transaction replaces the current data. A failed import retains the previous dataset. A source correction within the same month updates the data. The importer checks the source bytes on every run, even if the URL stays the same.
 
