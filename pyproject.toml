@@ -1,5 +1,5 @@
 [build-system]
-requires = ["uv_build>=0.13.0,<0.14.0"]
+requires = ["uv_build>=0.13.6,<0.14.0"]
 build-backend = "uv_build"
 
 [project]
@@ -9,10 +9,10 @@ description = "Current RVO ISDE meldcode data as a JSON API"
 requires-python = ">=3.15"
 dependencies = [
     "click>=8.5.0",
-    "fastapi>=0.143.0",
+    "fastapi>=0.162.0",
     "httpx>=0.28.1",
     "openpyxl>=3.1.5",
-    "pydantic>=2.14.0",
+    "pydantic>=2.14.2",
     "uvicorn>=0.54.0",
 ]
 
@@ -25,14 +25,14 @@ required-version = ">=0.13"
 
 [dependency-groups]
 dev = [
-    "httpx2>=2.13.1",
-    "playwright>=1.63.0",
-    "prek>=0.5.5",
-    "pytest>=9.1.1",
+    "httpx2>=2.16.0",
+    "playwright>=1.64.1",
+    "prek>=0.5.9",
+    "pytest>=9.2.0",
     "pytest-cov>=7.1.0",
     "pytest-socket>=0.8.1",
-    "ruff>=0.17.0",
-    "ty>=0.0.86",
+    "ruff>=0.17.3",
+    "ty>=0.0.95",
 ]
 
 [tool.ruff]
