@@ -8,7 +8,7 @@ Serve the current RVO ISDE meldcodelijsten as a free public JSON API at <https:/
 
 ## Last update
 
-2026-11-01: Dependency refresh on branch `chore/refresh-2026-11` (Python 3.15, uv 0.13.6, FastAPI 0.162, ruff 0.17.3, ty 0.0.95). 32 offline tests pass with 88.7% coverage. The Docker image builds and answers `/health`, lookup, and export locally. Production still runs the previous image until the release commands in `README.md` run.
+2026-11-01: Dependency refresh (PR #4: Python 3.15, uv 0.13.6, FastAPI 0.162, ruff 0.17.3, ty 0.0.95), merged as `7ca9fba` and deployed to buckland at 07:58 UTC. 32 offline tests pass with 88.7% coverage. After the deploy, `/health`, `/v1/products`, and `/v1/categories` answer with the October data.
 
 ## Verified state (2026-11-01)
 
@@ -16,12 +16,12 @@ Serve the current RVO ISDE meldcodelijsten as a free public JSON API at <https:/
 - Counts per category: heat_pumps 2,816, glass 1,876, insulation 1,723, solar_boilers 295, ventilation 206. A direct row count of each raw October workbook gives the same numbers, so the parser loses no rows.
 - The count fell from 8,120 (September) to 6,916 (October) at the 2026-10-09 import. RVO shortened the lists; the `Meldcodes` headers are identical in the August, September, and October workbooks.
 - A local import against the live RVO page finds the same five October workbooks with the same SHA-256 hashes as production. RVO has not yet published a November release.
-- From 2026-09-11 to 2026-09-23 every daily import failed with "RVO page does not contain all five workbook links: heat_pumps, insulation, glass, solar_boilers, ventilation", so the page had no usable link for any category. The previous data stayed online, and the import recovered by itself on 2026-09-24 with the September release. No alert exists for failed imports; only `~/logs/isde-ingest.log` on buckland shows them.
+- From 2026-09-11 to 2026-09-23 every daily import failed with "RVO page does not contain all five workbook links: heat_pumps, insulation, glass, solar_boilers, ventilation", so the page had no usable link for any category. The previous data stayed online, and the import recovered by itself on 2026-09-24 with the September release. No alert exists for failed imports (bead `isde-iha`); only `~/logs/isde-ingest.log` on buckland shows them.
 - Older releases stay online at RVO: the August 2026 heat pump workbook URL still returns the archived file (same SHA-256).
 
 ## Deployment
 
-The service runs as Docker Compose in `/home/rdeknijf/services/isde-api` on buckland, behind the host Traefik and Cloudflare (proxied CNAME `isde.deknijf.com` to `buckland.deknijf.com`). The production override `compose.production.yaml` uses the external `proxy` network and exposes no host port. The buckland checkout and its `DEPLOYED_COMMIT` file are at `3f26ea5` (Python 3.15.0, FastAPI 0.143.0 in the running container).
+The service runs as Docker Compose in `/home/rdeknijf/services/isde-api` on buckland, behind the host Traefik and Cloudflare (proxied CNAME `isde.deknijf.com` to `buckland.deknijf.com`). The production override `compose.production.yaml` uses the external `proxy` network and exposes no host port. The buckland checkout and its `DEPLOYED_COMMIT` file are at `7ca9fba` (Python 3.15.2, FastAPI 0.162.0 in the running container, checked 2026-11-01). Release: `git pull && docker compose -f compose.yaml -f compose.production.yaml up -d --build && git rev-parse HEAD > DEPLOYED_COMMIT`; a bare `docker compose up` drops the production override.
 
 The buckland crontab runs `scripts/ingest.sh` daily at 03:15 Europe/Amsterdam and appends to `/home/rdeknijf/logs/isde-ingest.log`. Raw workbooks and per-category metadata persist under `data/raw/` on the host. The move to k3s is bead `isde-hxk` (deferred).
 
