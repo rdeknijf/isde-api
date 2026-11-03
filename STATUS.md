@@ -8,6 +8,8 @@ Serve the current RVO ISDE meldcodelijsten as a free public JSON API at <https:/
 
 ## Last update
 
+2026-11-03: Source history check (bead isde-ami.3). The 2025-02 and 2025-06 lists return 404 at RVO, and the Wayback searches found no copy of those eight URLs; the 47 older workbooks that were still reachable are now in the buckland raw archive. This change is documentation and archive data only; the service was not redeployed.
+
 2026-11-01: Dependency refresh (PR #4: Python 3.15, uv 0.13.6, FastAPI 0.162, ruff 0.17.3, ty 0.0.95), merged as `7ca9fba` and deployed to buckland at 07:58 UTC. 32 offline tests pass with 88.7% coverage. After the deploy, `/health`, `/v1/products`, and `/v1/categories` answer with the October data.
 
 ## Verified state (2026-11-01)
@@ -17,7 +19,9 @@ Serve the current RVO ISDE meldcodelijsten as a free public JSON API at <https:/
 - The count fell from 8,120 (September) to 6,916 (October) at the 2026-10-09 import. RVO shortened the lists; the `Meldcodes` headers are identical in the August, September, and October workbooks.
 - A local import against the live RVO page finds the same five October workbooks with the same SHA-256 hashes as production. RVO has not yet published a November release.
 - From 2026-09-11 to 2026-09-23 every daily import failed with "RVO page does not contain all five workbook links: heat_pumps, insulation, glass, solar_boilers, ventilation", so the page had no usable link for any category. The previous data stayed online, and the import recovered by itself on 2026-09-24 with the September release. No alert exists for failed imports (bead `isde-iha`); only `~/logs/isde-ingest.log` on buckland shows them.
-- Older releases stay online at RVO: the August 2026 heat pump workbook URL still returns the archived file (same SHA-256).
+- 2026-11-03: Old workbook URLs can become unavailable at RVO. The 2025-02 and 2025-06 lists return 404 and the Wayback searches found no copy; every workbook URL found from 2025-09 to 2026-10 still answers. Details are in `AGENTS.md` under "Older monthly releases".
+- 2026-11-03: The raw archive on buckland now holds 62 workbooks from 2025-05 to 2026-10 (47 recovered from RVO and Wayback, 15 from the daily import). Each file matches the SHA-256 in its `metadata.json` record; recovered files from Wayback carry a `retrieved_via` field. The pre-change metadata is in `~/backups/isde-raw-metadata-2026-11-03.tar.gz` on buckland. An import after the change validated 6,916 records, and `/health` still reports 6,916 products.
+- The raw archive is in the daily buckland restic backup (`~/services/backup/backup.sh`, run by `hass-backup.timer` at 02:00, replicated to `/mnt/staddle`); the 2026-11-03 02:00 snapshot contains `data/raw`, but it predates the 47 recovered files; the next daily run (2026-11-04 02:00) is the first that can include them, and no snapshot with them is verified yet. A second copy is on anduril in `~/.local/share/isde-api/raw-archive/` (manual `rsync` on 2026-11-03, all hashes verified, not scheduled).
 
 ## Deployment
 
