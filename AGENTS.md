@@ -27,7 +27,14 @@ No accounts, metered billing, or speculative usage counters. Use Beads for defer
 - Amounts are formatted strings with leading spaces and Dutch separators (`'  €4.425'`, `' €20,25'`, `'  .'` for empty). Parse to integer cents.
 - Meldcodes look like `KA01290` (KA plus five digits) in both inspected lists.
 - Reuse checked 2026-09-07: <https://www.rvo.nl/onderwerpen/open-data> says "U mag deze hergebruiken." and "U bent niet verplicht RVO als bron te vermelden, tenzij het anders vermeld staat bij de datasets en webservices." The policy permits reuse and distribution of information, including apps. Images have separate restrictions. The meldcode download page states that the downloads confer no rights; it shows no separate reuse restriction. Include attribution and this disclaimer.
-- Older monthly releases: not verified whether RVO keeps them online. Assume no; archive every fetched file ourselves from day one.
+- Older monthly releases (checked 2026-11-03, bead isde-ami.3): old workbook URLs can become unavailable at RVO, so keep our own raw archive. Evidence:
+  - The 2024-10 Wayback snapshots of the page link PDF lists, not xlsx. This check recovered no xlsx workbook from before 2025.
+  - 2025-02 and 2025-06: the page linked four xlsx lists each. All eight URLs return 404 at RVO, and the Wayback searches found no capture of them.
+  - 2025-05: both URLs return 404 at RVO. The Wayback prefix search found the insulation and solar boiler workbooks, and both downloads from Wayback succeeded.
+  - 2025-09 to 2026-10: every URL found still returns the workbook at RVO. The recovered set has no heat pump list for 2025-12, only ventilation for 2026-01, and no insulation list for 2026-04. Files with other names can exist.
+  - The earliest ventilation workbook found is from 2026-01. The 2025 page snapshots link four categories.
+  - No file found for 2025-01, 03, 04, 07, 08. The search used Wayback page snapshots, a Wayback prefix search per month, and (except for 2025-01) a probe of the usual file name pattern at RVO. A file with a different name can still exist.
+  - All 47 recovered files are in the raw archive on buckland since 2026-11-03. The current parser reads insulation and solar boilers from 2025-05, and all five categories from 2026-02. It rejects the 2025-09 to 2025-12 glass files, the 2025-09 to 2025-11 heat pump files, and the 2026-01 ventilation file. Older glass lists use `MAX_WAARDE_U` and `Subsidiebedrag Monumentale woning` (no `Hoofdmeldcode`, no `Ug waarde`). Older heat pump lists have no `Subsidiebedragt 2e warmtepomp`. The 2026-01 ventilation list uses `Meldcode, Fabrikant, Type, Categorie, Subsidiebedrag`.
 - Existing competitor: ISDEscan (<https://isdescan.nl/isde-meldcode-check>), consumer lookup, no API, no history.
 - Rutger's own ISDE application context lives in `~/projects/isolation-subsidies` (meldcode verification for his 2026 application). Useful as a real test case; not a dependency.
 
