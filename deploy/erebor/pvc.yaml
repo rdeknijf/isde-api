@@ -1,0 +1,17 @@
+# The SQLite database and /data/raw, the archive of source workbooks. Some of
+# those workbooks exist nowhere else, because RVO removes old files. The retain
+# class keeps the volume when the PVC is removed.
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: isde-data
+  namespace: isde-api
+  labels:
+    app: isde-api
+spec:
+  accessModes:
+    - ReadWriteOnce
+  storageClassName: sbs-default-retain
+  resources:
+    requests:
+      storage: 1Gi

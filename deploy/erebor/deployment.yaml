@@ -1,0 +1,68 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: isde-api
+  namespace: isde-api
+  labels:
+    app: isde-api
+spec:
+  # 0 until the data is restored on the PVC. /health answers 503 on an empty
+  # database. Setting this to 1 is half of the go-live commit; the other half is
+  # `suspend: false` in cronjob.yaml.
+  replicas: 0
+  # The volume is ReadWriteOnce, so the old pod must stop before a new pod starts.
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: isde-api
+  template:
+    metadata:
+      labels:
+        app: isde-api
+    spec:
+      imagePullSecrets:
+        - name: ghcr-pull
+      securityContext:
+        runAsNonRoot: true
+        runAsUser: 1000
+        runAsGroup: 1000
+        # A fresh block volume is owned by root; the app runs as uid 1000.
+        fsGroup: 1000
+      containers:
+        - name: api
+          image: ghcr.io/rdeknijf/isde-api:911dac96374877eb54f11a5b995037696d9d793f
+          imagePullPolicy: IfNotPresent
+          ports:
+            - containerPort: 8000
+          env:
+            - name: DATABASE_PATH
+              value: /data/isde.db
+          volumeMounts:
+            - name: data
+              mountPath: /data
+          readinessProbe:
+            httpGet:
+              path: /health
+              port: 8000
+            initialDelaySeconds: 5
+            periodSeconds: 10
+            timeoutSeconds: 5
+          # A TCP check: /health answers 503 on a data problem, and a restart does
+          # not repair data.
+          livenessProbe:
+            tcpSocket:
+              port: 8000
+            initialDelaySeconds: 15
+            periodSeconds: 30
+            timeoutSeconds: 5
+          resources:
+            requests:
+              cpu: 25m
+              memory: 96Mi
+            limits:
+              memory: 256Mi
+      volumes:
+        - name: data
+          persistentVolumeClaim:
+            claimName: isde-data

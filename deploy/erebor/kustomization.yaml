@@ -1,0 +1,14 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+# isde-api on erebor. Reconciled by square's
+# clusters/erebor/flux/kustomization-isde-api.yaml from the `isde-api`
+# GitRepository, path ./deploy/erebor.
+resources:
+  - namespace.yaml
+  - sealedsecret-ghcr-pull.yaml # ghcr-pull: imagePullSecret, sealed for this namespace
+  - pvc.yaml
+  - deployment.yaml # staged at 0 replicas
+  - cronjob.yaml # daily import, staged as suspended
+  - service.yaml
+  - ingress.yaml
