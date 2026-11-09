@@ -8,6 +8,8 @@ Serve the current RVO ISDE meldcodelijsten as a free public JSON API at <https:/
 
 ## Last update
 
+2026-11-09: Moved to the erebor cluster; the buckland stack is stopped. See Deployment.
+
 2026-11-03: Source history check (bead isde-ami.3). The 2025-02 and 2025-06 lists return 404 at RVO, and the Wayback searches found no copy of those eight URLs; the 47 older workbooks that were still reachable are now in the buckland raw archive. This change is documentation and archive data only; the service was not redeployed.
 
 2026-11-01: Dependency refresh (PR #4: Python 3.15, uv 0.13.6, FastAPI 0.162, ruff 0.17.3, ty 0.0.95), merged as `7ca9fba` and deployed to buckland at 07:58 UTC. 32 offline tests pass with 88.7% coverage. After the deploy, `/health`, `/v1/products`, and `/v1/categories` answer with the October data.
@@ -26,9 +28,11 @@ Serve the current RVO ISDE meldcodelijsten as a free public JSON API at <https:/
 
 ## Deployment
 
-The service runs as Docker Compose in `/home/rdeknijf/services/isde-api` on buckland, behind the host Traefik and Cloudflare (proxied CNAME `isde.deknijf.com` to `buckland.deknijf.com`). The production override `compose.production.yaml` uses the external `proxy` network and exposes no host port. The buckland checkout and its `DEPLOYED_COMMIT` file are at `7ca9fba` (Python 3.15.2, FastAPI 0.162.0 in the running container, checked 2026-11-01). Release: `git pull && docker compose -f compose.yaml -f compose.production.yaml up -d --build && git rev-parse HEAD > DEPLOYED_COMMIT`; a bare `docker compose up` drops the production override.
+The service runs on the erebor cluster since 2026-11-09 (namespace `isde-api`, 1 GiB volume, manifests in `deploy/erebor/`), behind ingress-nginx and Cloudflare (proxied CNAME `isde.deknijf.com` to `erebor.deknijf.com`). Flux reconciles `deploy/erebor` from `main`. Release: set the new image SHA in `deploy/erebor/deployment.yaml` and `deploy/erebor/cronjob.yaml` and merge to `main`.
 
-The buckland crontab runs `scripts/ingest.sh` daily at 03:15 Europe/Amsterdam and appends to `/home/rdeknijf/logs/isde-ingest.log`. Raw workbooks and per-category metadata persist under `data/raw/` on the host. The move to k3s is bead `isde-hxk` (deferred).
+The CronJob `isde-ingest` runs daily at 03:15 Europe/Amsterdam. Its first run is due on 2026-11-10 and was not observed when this was written. No backup job exists for the volume on erebor yet (bead sq-wnlp in rdeknijf/square).
+
+The old Compose stack in `/home/rdeknijf/services/isde-api` on buckland is stopped, its cron line is commented out, and it is out of `~/services/update.sh`. Its files stay.
 
 ## Decisions
 
@@ -45,7 +49,7 @@ None.
 
 ## Resume path
 
-Read `AGENTS.md`, then run `bd ready` and `bd list --status=open`. Check freshness with `curl https://isde.deknijf.com/health` and `ssh buckland tail ~/logs/isde-ingest.log`.
+Read `AGENTS.md`, then run `bd ready` and `bd list --status=open`. Check freshness with `curl https://isde.deknijf.com/health` and `kubectl --context erebor -n isde-api get jobs`.
 
 ## Beads evaluation
 
