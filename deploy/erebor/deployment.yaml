@@ -6,10 +6,7 @@ metadata:
   labels:
     app: isde-api
 spec:
-  # 0 until the data is restored on the PVC. /health answers 503 on an empty
-  # database. Setting this to 1 is half of the go-live commit; the other half is
-  # `suspend: false` in cronjob.yaml.
-  replicas: 0
+  replicas: 1
   # The volume is ReadWriteOnce, so the old pod must stop before a new pod starts.
   strategy:
     type: Recreate

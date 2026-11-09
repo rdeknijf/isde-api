@@ -9,8 +9,7 @@ metadata:
 spec:
   schedule: "15 3 * * *"
   timeZone: Europe/Amsterdam
-  # Staged until the data is restored. See deployment.yaml.
-  suspend: true
+  suspend: false
   concurrencyPolicy: Forbid
   successfulJobsHistoryLimit: 1
   failedJobsHistoryLimit: 3
