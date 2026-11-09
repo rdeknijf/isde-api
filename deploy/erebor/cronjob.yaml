@@ -1,0 +1,64 @@
+# Daily import from the RVO meldcode lists.
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: isde-ingest
+  namespace: isde-api
+  labels:
+    app: isde-ingest
+spec:
+  schedule: "15 3 * * *"
+  timeZone: Europe/Amsterdam
+  # Staged until the data is restored. See deployment.yaml.
+  suspend: true
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      # One attempt per day: the next schedule is the retry.
+      backoffLimit: 0
+      activeDeadlineSeconds: 1800
+      template:
+        metadata:
+          labels:
+            app: isde-ingest
+        spec:
+          restartPolicy: Never
+          imagePullSecrets:
+            - name: ghcr-pull
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            runAsGroup: 1000
+            fsGroup: 1000
+          # The job must land on the node that has the api pod. The volume is
+          # ReadWriteOnce, and SQLite locking needs both pods on one host.
+          affinity:
+            podAffinity:
+              requiredDuringSchedulingIgnoredDuringExecution:
+                - labelSelector:
+                    matchLabels:
+                      app: isde-api
+                  topologyKey: kubernetes.io/hostname
+          containers:
+            - name: ingest
+              image: ghcr.io/rdeknijf/isde-api:911dac96374877eb54f11a5b995037696d9d793f
+              imagePullPolicy: IfNotPresent
+              command: [".venv/bin/isde-ingest", "--raw-dir", "/data/raw"]
+              env:
+                - name: DATABASE_PATH
+                  value: /data/isde.db
+              volumeMounts:
+                - name: data
+                  mountPath: /data
+              resources:
+                requests:
+                  cpu: 50m
+                  memory: 128Mi
+                limits:
+                  memory: 512Mi
+          volumes:
+            - name: data
+              persistentVolumeClaim:
+                claimName: isde-data

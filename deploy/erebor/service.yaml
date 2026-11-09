@@ -1,0 +1,14 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: isde-api
+  namespace: isde-api
+  labels:
+    app: isde-api
+spec:
+  selector:
+    app: isde-api
+  ports:
+    - name: http
+      port: 8000
+      targetPort: 8000

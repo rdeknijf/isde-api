@@ -1,0 +1,29 @@
+# Public front door on erebor. DNS-01 through Cloudflare, so the certificate is
+# issued before DNS points here. Until the DNS switch, this Ingress answers only
+# a request that forces the erebor address (curl --resolve).
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: isde-api
+  namespace: isde-api
+  labels:
+    app: isde-api
+  annotations:
+    cert-manager.io/cluster-issuer: cloudflare-dns01
+spec:
+  ingressClassName: nginx
+  tls:
+    - hosts:
+        - isde.deknijf.com
+      secretName: isde-api-tls
+  rules:
+    - host: isde.deknijf.com
+      http:
+        paths:
+          - path: /
+            pathType: Prefix
+            backend:
+              service:
+                name: isde-api
+                port:
+                  number: 8000
